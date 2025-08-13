@@ -4,15 +4,15 @@
 
 🎉 **Private Alpha** - Official SDKs for [HotEval](https://hoteval.com) - Runtime Evaluation for Agentic AI Systems.
 
-Continuously monitor, score, and improve your LLM agents in production. HotEval is Sentry meets Pytest, for AI.
+Continuously monitor, score, and improve your LLM agents in production.
 
 ## Available SDKs
 
 | Language | Status | Installation | Documentation |
 |----------|--------|-------------|---------------|
 | **Python** | ✅ Available | `pip install hoteval` | [python/README.md](python/README.md) |
-| **Node.js** | 🔄 Under Consideration | - | Coming soon |
-| **Go** | 🔄 Under Consideration | - | Coming soon |
+| **Node.js** | 🔄 Under Consideration | - | - |
+| **Go** | 🔄 Under Consideration | - | - |
 
 ## Quick Start
 
