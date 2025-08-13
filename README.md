@@ -1,47 +1,33 @@
-# HotEval Python SDK
+# HotEval SDKs
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/hoteval.svg)](https://pypi.org/project/hoteval/)
-[![Python Versions](https://img.shields.io/pypi/pyversions/hoteval.svg)](https://pypi.org/project/hoteval/)
 
-**HotEval Python SDK** is the official client library for [HotEval](https://hoteval.ai), enabling you to instrument your AI agents with **runs**, **steps**, and **automated checks**, fully compatible with [OpenTelemetry](https://opentelemetry.io/).
+🎉 **Private Alpha** - Official SDKs for [HotEval](https://hoteval.com) - Runtime Evaluation for Agentic AI Systems.
 
-This SDK helps you:
-- **Trace** entire agent runs and individual steps
-- **Log** prompts, outputs, and tool calls
-- **Attach** automated evaluations ("checks") to runs or steps
-- **Export** telemetry in OpenTelemetry format for integration with your observability stack
+Continuously monitor, score, and improve your LLM agents in production. HotEval is Sentry meets Pytest, for AI.
 
----
+## Available SDKs
 
-## Features
+| Language | Status | Installation | Documentation |
+|----------|--------|-------------|---------------|
+| **Python** | ✅ Available | `pip install hoteval` | [python/README.md](python/README.md) |
+| **Node.js** | 🔄 Under Consideration | - | Coming soon |
+| **Go** | 🔄 Under Consideration | - | Coming soon |
 
-- **Run-level & step-level tracing** — group operations under a single run
-- **Structured events** — record prompts, outputs, tool I/O
-- **Automated checks** — factuality, numeric sanity, compliance, etc.
-- **OpenTelemetry under the hood** — compatible with Jaeger, Grafana, Sentry, etc.
-- **Minimal API** — quick to integrate
-- **Future-proof** — designed to expand into Node.js & Go SDKs in the same repo
+## Quick Start
 
----
-
-## Installation
-
-```bash
-pip install hoteval
-```
-
----
-
-## Quickstart
+### Python
 
 ```python
 import hoteval
 
-# Start a run (root span)
-run = hoteval.start_run(name="agent.run", meta={"project": "Doc QA", "user_id": "u_42"})
+# Configure with your API key
+hoteval.configure(api_key="your_api_key_here")
 
-# Log a step (child span) with events
+# Start a run
+run = hoteval.start_run(name="agent.chat", meta={"user_id": "u_123"})
+
+# Log a step with events
 step = hoteval.log_step(
     run=run,
     name="llm.call",
@@ -52,43 +38,77 @@ step = hoteval.log_step(
     ]
 )
 
-# Record a check for that step
-hoteval.record_check(
-    target=step,
-    rule="factuality"
-)
-
-# Run-level check (applies to whole run)
-hoteval.record_check(
-    run=run,
-    rule="session_compliance"
-)
-
-# End the run (triggers run-level evaluations)
+# End the run
 hoteval.end_run(run)
+
+# 🎉 Checks are configured in your HotEval dashboard!
 ```
 
----
+For detailed Python documentation, see [python/README.md](python/README.md).
 
-## Concepts
+## Core Concepts
 
-| Concept   | Description |
-|-----------|-------------|
-| **Run**   | A complete agent interaction or workflow. Maps to the root span in OpenTelemetry. |
-| **Step**  | A timed operation inside a run (LLM call, tool invocation). Maps to a child span. |
+| Concept | Description |
+|---------|-------------|
+| **Run** | A complete agent interaction or workflow. Groups related steps together. |
+| **Step** | A timed operation inside a run (LLM call, tool invocation, etc.). |
 | **Event** | A point-in-time record inside a step (prompt, output, tool I/O). |
-| **Check** | An automated evaluation attached to a run or step (factuality, compliance, etc.). |
+| **Check** | Automated evaluations configured in your dashboard (factuality, safety, etc.). |
 
----
+## Dashboard-Driven Evaluation
 
-## License
+**All evaluation logic is configured in your HotEval dashboard**, not in your code:
 
-This project is licensed under the [MIT License](LICENSE).
+- **Visual check configuration** - Set up factuality, safety, performance checks with a UI
+- **No code changes needed** - Modify check rules without redeploying your app
+- **Team collaboration** - Share check configurations across your team
+- **Real-time results** - See check results instantly in your dashboard
+- **Cross-language consistency** - Same checks work across Python, Node.js, Go SDKs
 
----
+Simply instrument your code with SDK calls and configure your evaluation rules at [dev.hoteval.com](https://dev.hoteval.com).
+
+## Repository Structure
+
+This repository contains multiple language SDKs with shared schemas and tooling:
+
+```
+hoteval-sdk/
+├── python/                 # Python SDK
+│   ├── hoteval/           # Python source code
+│   ├── tests/             # Python tests
+│   ├── pyproject.toml     # Python package config
+│   └── README.md          # Python documentation
+├── schemas/               # Shared message schemas
+│   ├── messages.json      # JSON schema for API messages
+│   └── tools/             # Schema generation tools
+├── examples/              # Usage examples (all languages)
+├── scripts/               # Release automation
+├── DEVELOPMENT.md         # Development guide
+└── README.md             # This file
+```
+
+Future language directories (`node/`, `go/`, etc.) will follow the same pattern.
+
+## Authentication
+
+Get your API key from the [HotEval dashboard](https://hoteval.com/dashboard) and set it as an environment variable:
+
+```bash
+export HOTEVAL_API_KEY="your_api_key_here"
+```
+
+## Development
+
+For development setup and contribution guidelines, see [DEVELOPMENT.md](DEVELOPMENT.md).
+
+Each language SDK has its own development instructions in its respective directory.
 
 ## Links
 
 - [HotEval Website](https://hoteval.com)
-- [OpenTelemetry](https://opentelemetry.io)
-- [PyPI Package](https://pypi.org/project/hoteval/)
+- [Dashboard](https://dev.hoteval.com)
+- [Python SDK Documentation](python/README.md)
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

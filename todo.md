@@ -1,0 +1,2 @@
+- [ ] Check team@hoteval.com email exists, used in python/hoteval/__init__.py and few other places
+- [ ] Update "**Checks are configured in your HotEval dashboard** at [dev.hoteval.com](https://dev.hoteval.com), not in your code! This gives you:" with proper URL.
