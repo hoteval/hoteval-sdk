@@ -52,21 +52,21 @@ install-python: .uv
 # Python SDK targets
 .PHONY: test-python
 test-python: install-python
-	cd python && uv run pytest tests/ -v
+	cd python && uv run --with pytest pytest tests/ -v
 
 .PHONY: format-python
 format-python: install-python
-	cd python && uv run ruff format hoteval/
-	cd python && uv run ruff check --fix hoteval/
+	cd python && uv run --with ruff ruff format hoteval/
+	cd python && uv run --with ruff ruff check --fix hoteval/
 
 .PHONY: lint-python
 lint-python: install-python
-	cd python && uv run ruff check hoteval/
-	cd python && uv run ruff format --check --diff hoteval/
+	cd python && uv run --with ruff ruff check hoteval/
+	cd python && uv run --with ruff ruff format --check --diff hoteval/
 
 .PHONY: typecheck-python
 typecheck-python: install-python
-	cd python && uv run mypy hoteval/
+	cd python && uv run --with mypy mypy hoteval/
 
 .PHONY: build-python
 build-python: install-python
