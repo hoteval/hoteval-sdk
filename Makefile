@@ -46,7 +46,7 @@ install: .uv .pre-commit install-python
 
 .PHONY: install-python
 install-python: .uv
-	cd python && uv sync --frozen
+	cd python && uv sync --group dev
 	cd python && uv pip install -e .
 
 # Python SDK targets
