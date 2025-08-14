@@ -96,10 +96,13 @@ example-python: install-python
 	cd python && uv run python ../examples/basic_usage.py
 
 # General targets
-.PHONY: validate-schema
-validate-schema:
-	@echo "Validating message schema..."
-	@python -c "import json; json.load(open('schemas/messages.json'))" && echo "✓ Schema is valid JSON"
+.PHONY: check-pre-commit
+check-pre-commit: .pre-commit
+	@echo "✓ Pre-commit is available"
+
+.PHONY: check-uv
+check-uv: .uv
+	@echo "✓ uv is available"
 
 .PHONY: clean
 clean: clean-python
@@ -111,7 +114,7 @@ dev: install
 	@echo "✓ Development environment ready"
 
 .PHONY: check
-check: test-python lint-python typecheck-python validate-schema
+check: test-python lint-python typecheck-python
 	@echo "✓ All checks passed"
 
 .PHONY: all

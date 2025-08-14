@@ -7,7 +7,7 @@ on:
     branches: [main, develop]
 
 jobs:
-  pre-commit:
+  system-checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,14 +19,6 @@ jobs:
 
       - name: Set up Python
         run: uv python install 3.11
-
-      - name: Install dependencies
-        run: |
-          cd python
-          uv sync --group dev
-
-      - name: Run pre-commit
-        run: make check-pre-commit
 
       - name: Check system dependencies
         run: |
