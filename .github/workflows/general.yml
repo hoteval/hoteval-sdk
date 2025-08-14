@@ -1,0 +1,77 @@
+name: General CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: |
+          cd python
+          uv sync --group dev
+
+      - name: Run pre-commit
+        run: make check-pre-commit
+
+      - name: Check system dependencies
+        run: |
+          make check-uv
+          make check-pre-commit
+
+  validate-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate repository structure
+        run: |
+          # Check required files exist
+          test -f LICENSE
+          test -f README.md
+          test -f DEVELOPMENT.md
+          test -f Makefile
+          test -f python/pyproject.toml
+          test -f python/README.md
+
+          # Check Python package structure
+          test -d python/hoteval
+          test -f python/hoteval/__init__.py
+          test -d python/tests
+
+          echo "✅ Repository structure validation passed"
+
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check documentation links
+        run: |
+          # Basic check for common link patterns in markdown files
+          echo "Checking for broken internal links..."
+
+          # Check that referenced files exist
+          if grep -r "\[.*\](python/README\.md)" . --include="*.md"; then
+            test -f python/README.md
+          fi
+
+          if grep -r "\[.*\](DEVELOPMENT\.md)" . --include="*.md"; then
+            test -f DEVELOPMENT.md
+          fi
+
+          echo "✅ Link validation passed"

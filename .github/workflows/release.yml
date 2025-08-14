@@ -1,0 +1,78 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      package:
+        description: "Package to release"
+        required: true
+        default: "python"
+        type: choice
+        options:
+          - python
+
+jobs:
+  release-python:
+    if: github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && github.event.inputs.package == 'python')
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write # For trusted publishing to PyPI
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: |
+          cd python
+          uv sync --group dev
+
+      - name: Build package
+        run: make build-python
+
+      - name: Check package
+        run: |
+          cd python
+          uv run twine check dist/*
+
+      - name: Publish to Test PyPI
+        if: contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc')
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: python/dist/
+
+      - name: Publish to PyPI
+        if: github.event_name == 'release' && github.event.action == 'published' && !contains(github.ref, 'alpha') && !contains(github.ref, 'beta') && !contains(github.ref, 'rc')
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python/dist/
+
+  update-documentation:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    needs: release-python
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update version references
+        run: |
+          # Extract version from release tag
+          VERSION=${GITHUB_REF#refs/tags/python-v}
+          echo "Released version: $VERSION"
+
+          # You could add steps here to update documentation
+          # or other version references if needed

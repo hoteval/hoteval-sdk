@@ -1,0 +1,57 @@
+name: Security
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run weekly on Sundays at 3 AM UTC
+    - cron: "0 3 * * 0"
+
+jobs:
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for secret scanning
+
+      - name: Run Truffehog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  dependency-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: |
+          cd python
+          uv sync --group dev
+
+      - name: Run Safety check
+        run: |
+          cd python
+          uv run pip install safety
+          uv run safety check
+
+      - name: Run Bandit security linter
+        run: |
+          cd python
+          uv run pip install bandit
+          uv run bandit -r hoteval/ -ll || true
+          echo "✅ Bandit security scan completed"

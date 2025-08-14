@@ -1,0 +1,132 @@
+name: Python SDK CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "python/**"
+      - "examples/**"
+      - ".github/workflows/python-ci.yml"
+      - "Makefile"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "python/**"
+      - "examples/**"
+      - ".github/workflows/python-ci.yml"
+      - "Makefile"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          cd python
+          uv sync --group dev
+
+      - name: Run tests
+        run: make test-python
+
+      - name: Upload coverage reports
+        if: matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v4
+        with:
+          file: python/coverage.xml
+          flags: python
+          name: python-coverage
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  lint-and-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: |
+          cd python
+          uv sync --group dev
+
+      - name: Check formatting
+        run: make format-python
+
+      - name: Run linting
+        run: make lint-python
+
+      - name: Run type checking
+        run: make typecheck-python
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: |
+          cd python
+          uv sync --group dev
+
+      - name: Build package
+        run: make build-python
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-dist
+          path: python/dist/
+          retention-days: 7
+
+  example:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: |
+          cd python
+          uv sync --group dev
+
+      - name: Run example
+        run: make example-python
+        env:
+          HOTEVAL_API_KEY: demo_key
+          HOTEVAL_BASE_URL: http://localhost:8000
