@@ -40,7 +40,9 @@ jobs:
           uv sync --group dev
 
       - name: Run tests
-        run: make test-python
+        run: |
+          cd python
+          uv run pytest tests/ -v --cov=hoteval --cov-report=xml
 
       - name: Upload coverage reports
         if: matrix.python-version == '3.11'
@@ -71,13 +73,19 @@ jobs:
           uv sync --group dev
 
       - name: Check formatting
-        run: make format-python
+        run: |
+          cd python
+          uv run ruff format --check hoteval/
 
       - name: Run linting
-        run: make lint-python
+        run: |
+          cd python
+          uv run ruff check hoteval/
 
       - name: Run type checking
-        run: make typecheck-python
+        run: |
+          cd python
+          uv run mypy hoteval/
 
   build:
     runs-on: ubuntu-latest
@@ -98,7 +106,9 @@ jobs:
           uv sync --group dev
 
       - name: Build package
-        run: make build-python
+        run: |
+          cd python
+          uv run python -m build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -126,7 +136,9 @@ jobs:
           uv sync --group dev
 
       - name: Run example
-        run: make example-python
+        run: |
+          cd python
+          uv run python ../examples/basic_usage.py
         env:
           HOTEVAL_API_KEY: demo_key
           HOTEVAL_BASE_URL: http://localhost:8000
