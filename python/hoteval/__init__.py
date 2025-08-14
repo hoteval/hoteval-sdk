@@ -1,6 +1,6 @@
 """HotEval Python SDK - Official client library for HotEval AI agent tracing and evaluation."""
 
-__version__ = "0.1.0"
+__version__ = "0.0.9000"
 __author__ = "HotEval Team"
 __email__ = "team@hoteval.com"
 
