@@ -33,18 +33,13 @@ jobs:
       - name: Set up Python
         run: uv python install 3.11
 
-      - name: Install dependencies
-        run: |
-          cd python
-          uv sync --group dev
-
       - name: Build package
         run: make build-python
 
       - name: Check package
         run: |
           cd python
-          uv run twine check dist/*
+          uv run --with twine twine check dist/*
 
       - name: Publish to Test PyPI
         if: contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc')
