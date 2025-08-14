@@ -51,25 +51,25 @@ install-python: .uv
 
 # Python SDK targets
 .PHONY: test-python
-test-python: .uv
+test-python: install-python
 	cd python && uv run pytest tests/ -v
 
 .PHONY: format-python
-format-python: .uv
+format-python: install-python
 	cd python && uv run ruff format hoteval/
 	cd python && uv run ruff check --fix hoteval/
 
 .PHONY: lint-python
-lint-python: .uv
+lint-python: install-python
 	cd python && uv run ruff check hoteval/
 	cd python && uv run ruff format --check --diff hoteval/
 
 .PHONY: typecheck-python
-typecheck-python: .uv
+typecheck-python: install-python
 	cd python && uv run mypy hoteval/
 
 .PHONY: build-python
-build-python: .uv
+build-python: install-python
 	cd python && uv build
 
 .PHONY: clean-python
@@ -79,21 +79,21 @@ clean-python:
 
 # Release targets
 .PHONY: release-python
-release-python: .uv
+release-python: install-python
 	@if [ -z "$(VERSION)" ]; then echo "Usage: make release-python VERSION=x.y.z"; exit 1; fi
 	cd python && uv run scripts/release/prepare.py $(VERSION)
 
 .PHONY: release-push
-release-push: .uv
+release-push: install-python
 	cd python && uv run scripts/release/push.py
 
 # Example targets
 .PHONY: example-python
-example-python:
+example-python: install-python
 	@echo "Setting up demo environment variables..."
 	@export HOTEVAL_API_KEY="demo_key" && \
 	export HOTEVAL_BASE_URL="http://localhost:8000" && \
-	python examples/basic_usage.py
+	cd python && uv run python ../examples/basic_usage.py
 
 # General targets
 .PHONY: validate-schema
