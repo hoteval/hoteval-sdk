@@ -7,6 +7,29 @@ from typing import Any, Dict, List, Optional, Union
 
 
 @dataclass
+class AgentConfig:
+    """Configuration for an agent, set during SDK initialization."""
+
+    name: str
+    environment: str  # e.g., "dev", "prod", "staging"
+    data_location: str  # e.g., "EU" (US support coming soon)
+    version: str  # e.g., "1.0.0", "main", "feature-branch"
+    description: Optional[str] = None
+    agent_type: str = "sdk_configured"
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for JSON serialization."""
+        return {
+            "name": self.name,
+            "environment": self.environment,
+            "data_location": self.data_location,
+            "version": self.version,
+            "description": self.description,
+            "agent_type": self.agent_type,
+        }
+
+
+@dataclass
 class Event:
     """An event within a step (e.g., prompt, output, tool call)."""
 

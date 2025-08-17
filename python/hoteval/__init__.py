@@ -4,16 +4,15 @@ __version__ = "0.0.9000"
 __author__ = "HotEval Team"
 __email__ = "team@hoteval.com"
 
+from .agent import Agent, create_agent
 from .client import configure
-from .runs import end_run, start_run
-from .steps import log_step
-from .types import Event, Run, Step
+from .types import AgentConfig, Event, Run, Step
 
 __all__ = [
     "configure",
-    "start_run",
-    "end_run",
-    "log_step",
+    "Agent",
+    "create_agent",
+    "AgentConfig",
     "Run",
     "Step",
     "Event",

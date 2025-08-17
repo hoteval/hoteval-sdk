@@ -13,82 +13,224 @@ pip install hoteval
 ```python
 import hoteval
 
-# Configure (requires HOTEVAL_API_KEY env var or pass api_key)
-hoteval.configure()
-
-# Start a run
-run = hoteval.start_run(name="agent.chat", meta={"user_id": "u_123"})
-
-# Log a step with events
-step = hoteval.log_step(
-    run=run,
-    name="llm.call",
-    attrs={"model": "gpt-4"},
-    events=[
-        {"type": "prompt", "content": "What's the capital of France?"},
-        {"type": "output", "content": "Paris"}
-    ]
+# Configure global settings (shared across all agents)
+hoteval.configure(
+    api_key="your_api_key_here",
+    environment="dev",  # dev, staging, production
+    data_location="EU",  # EU only (US support coming soon)
 )
 
-# End the run
-hoteval.end_run(run)
+# Create an agent instance
+agent = hoteval.create_agent(
+    name="my-chatbot-agent",
+    version="1.0.0",
+    description="My conversational AI agent"
+)
+
+# Use the agent for runs (strong coupling)
+with agent.run(name="agent.chat", meta={"user_id": "u_123"}) as run:
+    agent.log_step(
+        run=run,
+        name="llm.call",
+        attrs={"model": "gpt-4"},
+        events=[
+            {"type": "prompt", "content": "What's the capital of France?"},
+            {"type": "output", "content": "Paris"}
+        ]
+    )
+# Run automatically ends when exiting the context
 
 # 🎉 Checks will be configured and run automatically in your
 # HotEval dashboard at dev.hoteval.com!
 ```
 
+## Best Practices
+
+### Multiple Agents
+
+Create agent instances for strong coupling between agents and their runs:
+
+```python
+# Configure once
+hoteval.configure(api_key="key", environment="production")
+
+# Create agent instances
+support_bot = hoteval.create_agent(
+    name="customer-support-chatbot",
+    version="2.1.0",
+    description="AI chatbot for customer support"
+)
+
+analytics_engine = hoteval.create_agent(
+    name="data-analytics-agent",
+    version="1.5.2",
+    description="Data processing engine"
+)
+
+# Use agents with strong coupling
+with support_bot.run(name="support-chat") as run:
+    support_bot.log_step(run=run, name="process_inquiry", events=[...])
+
+with analytics_engine.run(name="data-analysis") as run:
+    analytics_engine.log_step(run=run, name="process_data", events=[...])
+```
+
 ## Configuration
 
-Set your API key:
+### Global Configuration
+
+Configure shared settings that apply to all agents:
+
+```python
+hoteval.configure(
+    # Authentication
+    api_key="your_api_key_here",  # or set HOTEVAL_API_KEY env var
+
+    # Connection settings
+    base_url="https://api.hoteval.com",  # or set HOTEVAL_BASE_URL env var
+    timeout=30.0,
+
+    # Default agent settings (can be overridden per agent)
+    environment="dev",      # dev, staging, production
+    data_location="EU",     # EU only (US support coming soon)
+)
+```
+
+### Agent Configuration
+
+Create agent instances with their specific configuration:
+
+```python
+# Create agents with specific settings
+support_bot = hoteval.create_agent(
+    name="customer-support-chatbot",
+    version="2.1.0",
+    description="AI chatbot for customer support"
+)
+
+analytics_engine = hoteval.create_agent(
+    name="data-analytics-agent",
+    version="1.5.2",
+    environment="staging",  # Override global setting
+    description="Agent for data analysis"
+)
+```
+
+### Environment Variables
+
+You can use environment variables for configuration:
+
 ```bash
 export HOTEVAL_API_KEY="your_api_key_here"
+export HOTEVAL_BASE_URL="http://localhost:8000"  # for local development
+export ENVIRONMENT="dev"
+export DATA_LOCATION="EU"
+export VERSION="1.0.0"
 ```
 
-Or pass it directly:
 ```python
-hoteval.configure(api_key="your_api_key_here")
+import os
+hoteval.configure(
+    environment=os.getenv("ENVIRONMENT", "dev"),
+    data_location=os.getenv("DATA_LOCATION", "EU"),
+)
+
+agent = hoteval.create_agent(
+    name="my-agent",
+    version=os.getenv("VERSION", "main"),
+)
 ```
 
-For local development:
-```bash
-export HOTEVAL_BASE_URL="http://localhost:8000"
+### Version Management
+
+Easily manage agent versions and upgrades:
+
+```python
+# Create initial agent
+support_bot = hoteval.create_agent(
+    name="customer-support-chatbot",
+    version="2.1.0"
+)
+
+# Later, upgrade to new version
+support_bot_v2 = hoteval.create_agent(
+    name="customer-support-chatbot",  # Same name, different version
+    version="2.2.0",
+    description="Updated support bot with improved responses"
+)
+
+# Use the new version
+with support_bot_v2.run(name="support-chat-v2") as run:
+    support_bot_v2.log_step(run=run, name="process_inquiry_v2", events=[...])
 ```
 
 ## API Reference
 
-### `hoteval.configure(api_key=None, base_url=None, timeout=30.0)`
+### `hoteval.configure(api_key=None, base_url=None, timeout=30.0, environment=None, data_location=None)`
 
-Configure the SDK.
+Configure the SDK with global settings.
 
+**Parameters:**
 - `api_key`: API key (or set `HOTEVAL_API_KEY` env var)
 - `base_url`: Backend URL (or set `HOTEVAL_BASE_URL` env var)
 - `timeout`: Request timeout in seconds
+- `environment`: Default environment (dev, staging, production)
+- `data_location`: Default data location (EU only, US support coming soon)
 
-### `hoteval.start_run(name, meta=None)`
+### `hoteval.create_agent(name, version, environment=None, data_location=None, description=None, agent_type="sdk_configured")`
 
-Start a new run.
+Create an agent instance with strong coupling.
 
-- `name`: Run name/identifier
-- `meta`: Optional metadata dictionary
+**Required parameters:**
+- `name`: Agent name
+- `version`: Agent version
 
-Returns a `Run` object.
+**Optional parameters:**
+- `environment`: Environment (defaults to global setting)
+- `data_location`: Data location (defaults to global setting, EU only)
+- `description`: Optional description of the agent
+- `agent_type`: Type of agent (default: "sdk_configured")
 
-### `hoteval.end_run(run)`
+**Returns:** Agent instance
+
+### `agent.run(name, meta=None)`
+
+Context manager for running with an agent.
+
+**Parameters:**
+- `name`: Run name
+- `meta`: Optional metadata
+
+**Yields:** Run object
+
+### `agent.start_run(name, meta=None)`
+
+Start a run with this agent.
+
+**Parameters:**
+- `name`: Run name
+- `meta`: Optional metadata
+
+**Returns:** Run object
+
+### `agent.end_run(run)`
 
 End a run.
 
-- `run`: Run object to end
+**Parameters:**
+- `run`: Run to end
 
-### `hoteval.log_step(run, name, attrs=None, events=None)`
+### `agent.log_step(run, name, attrs=None, events=None)`
 
-Log a step within a run.
+Log a step for this agent's run.
 
-- `run`: Parent run object
+**Parameters:**
+- `run`: Parent run
 - `name`: Step name
-- `attrs`: Optional attributes dictionary
-- `events`: Optional list of event dictionaries
+- `attrs`: Optional attributes
+- `events`: Optional events
 
-Returns a `Step` object.
+**Returns:** Step object
 
 ## Data Types
 
