@@ -32,8 +32,12 @@ class HotEvalClient:
         self.timeout = timeout
 
         # Default agent settings that can be overridden per agent
-        self.default_environment = default_environment or os.getenv("ENVIRONMENT", "dev")
-        self.default_data_location = default_data_location or os.getenv("DATA_LOCATION", "EU")
+        self.default_environment = default_environment or os.getenv(
+            "ENVIRONMENT", "dev"
+        )
+        self.default_data_location = default_data_location or os.getenv(
+            "DATA_LOCATION", "EU"
+        )
 
         # Current agent configuration (can be changed)
         self.current_agent_config: Optional[AgentConfig] = None
