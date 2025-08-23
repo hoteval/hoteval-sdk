@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-🎉 **Private Alpha** - Official SDKs for [HotEval](https://hoteval.com) - Runtime Evaluation for Agentic AI Systems.
+🎉 **Private Alpha** - Official SDKs for [HotEval](https://dev.hoteval.com) - Runtime Evaluation for Agentic AI Systems.
 
 Continuously monitor, score, and improve your LLM agents in production.
 
@@ -91,7 +91,7 @@ Future language directories (`node/`, `go/`, etc.) will follow the same pattern.
 
 ## Authentication
 
-Get your API key from the [HotEval dashboard](https://hoteval.com/dashboard) and set it as an environment variable:
+Get your API key from the [HotEval dashboard](https://dashboard.dev.hoteval.com) and set it as an environment variable:
 
 ```bash
 export HOTEVAL_API_KEY="your_api_key_here"
@@ -105,8 +105,8 @@ Each language SDK has its own development instructions in its respective directo
 
 ## Links
 
-- [HotEval Website](https://hoteval.com)
-- [Dashboard](https://dev.hoteval.com)
+- [HotEval Website](https://dev.hoteval.com)
+- [Dashboard](https://dashboard.dev.hoteval.com)
 - [Python SDK Documentation](python/README.md)
 
 ## License
